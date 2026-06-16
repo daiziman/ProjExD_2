@@ -170,6 +170,9 @@ def main():
         bb_rct.move_ip(avx, avy)
 
         yoko, tate = check_bound(bb_rct)
+        if not yoko or not tate:
+            bb_rct.move_ip(-avx, -avy)
+            
         if not yoko:
             vx *= -1
         if not tate:
