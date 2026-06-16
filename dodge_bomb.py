@@ -55,6 +55,22 @@ def gameover(screen: pg.Surface) -> None:
     pg.display.update()
     time.sleep(5)
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    時間経過で拡大する爆弾Surfaceのリストと、加速する加速度のリストを返す関数
+    戻り値：爆弾Surfaceのリストと加速度リストのタプル
+    """
+    bb_imgs = []
+    bb_accs = [a for a in range(1, 11)]
+    
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_img.set_colorkey((0, 0, 0))
+        bb_imgs.append(bb_img)
+        
+    return bb_imgs, bb_accs
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -64,9 +80,11 @@ def main():
     kk_rct.center = 300, 200
 
     #爆弾の初期化
-    bb_img = pg.Surface((20, 20))
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
-    bb_img.set_colorkey((0, 0, 0))
+    # bb_img = pg.Surface((20, 20))
+    # pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    # bb_img.set_colorkey((0, 0, 0))
+    bb_imgs, bb_accs = init_bb_imgs()
+    bb_img = bb_imgs[0]
     bb_rct = bb_img.get_rect()
     bb_rct.centerx = random.randint(0, WIDTH)
     bb_rct.centery = random.randint(0, HEIGHT)
@@ -102,12 +120,24 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
-        bb_rct.move_ip(vx, vy)
+        # bb_rct.move_ip(vx, vy)
+        # yoko, tate = check_bound(bb_rct)
+        # if not yoko:
+        #     vx *= -1
+        # if not tate:
+        #     vy *= -1
+        # screen.blit(bb_img, bb_rct)
         yoko, tate = check_bound(bb_rct)
         if not yoko:
             vx *= -1
         if not tate:
             vy *= -1
+        avx = vx * bb_accs[min(tmr//500, 9)]
+        avy = vy * bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_rct.width, bb_rct.height = bb_img.get_rect().size
+        
+        bb_rct.move_ip(avx, avy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
