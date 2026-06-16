@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import time
 import pygame as pg
 
 
@@ -26,6 +27,34 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def gameover(screen: pg.Surface) -> None:
+    """
+    ゲームオーバー時に、半透明の黒い画面と「Game Over」の文字、
+    泣いているこうかとんを表示する関数
+    引数 screen：画面Surface
+    戻り値：なし
+    """
+    bg_black = pg.Surface((WIDTH, HEIGHT))
+    pg.draw.rect(bg_black, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+
+    bg_black.set_alpha(200)
+
+    fonto = pg.font.Font(None, 80)
+    txt = fonto.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    bg_black.blit(txt, txt_rct)
+
+    kk_img = pg.image.load("fig/8.png")
+    kk_rct1 = kk_img.get_rect(center=(WIDTH // 2 - 200, HEIGHT // 2))
+    kk_rct2 = kk_img.get_rect(center=(WIDTH // 2 + 200, HEIGHT // 2))
+    bg_black.blit(kk_img, kk_rct1)
+    bg_black.blit(kk_img, kk_rct2)
+
+    screen.blit(bg_black, [0, 0])
+
+    pg.display.update()
+    time.sleep(5)
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -38,7 +67,7 @@ def main():
     bb_img = pg.Surface((20, 20))
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
     bb_img.set_colorkey((0, 0, 0))
-    bb_rct = bb_img.get_rect() # 爆弾Rectの抽出
+    bb_rct = bb_img.get_rect()
     bb_rct.centerx = random.randint(0, WIDTH)
     bb_rct.centery = random.randint(0, HEIGHT)
     vx, vy = +5, +5
@@ -50,7 +79,7 @@ def main():
             if event.type == pg.QUIT: 
                 return
         if kk_rct.colliderect(bb_rct):
-            print("ゲームオーバー")
+            gameover(screen)
             return
         screen.blit(bg_img, [0, 0]) 
 
